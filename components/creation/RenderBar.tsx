@@ -136,7 +136,7 @@ export function RenderBar({
         </div>
 
         <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-          <span>leva name</span>
+          <span>batch name</span>
           <input
             value={leva}
             onChange={(e) => changeLeva(e.target.value)}
