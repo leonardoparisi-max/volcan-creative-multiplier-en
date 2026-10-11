@@ -14,6 +14,14 @@ automatically. You don't need to know anything about programming — double-clic
 - Internet is only needed for that first install; after that the tool runs
   100% offline on your machine — none of your videos ever leave it.
 
+## Before you open it: download the tool
+
+On the [project page](https://github.com/leonardoparisi-max/volcan-creative-multiplier-en),
+click **Code → Download ZIP**. Unzip the download and open the resulting folder.
+Double-click **`Open Creative Multiplier.command`** inside it.
+The first time, macOS may ask you to confirm opening a downloaded file.
+Then follow the on-screen instructions; installing dependencies can take a few minutes.
+
 ## 1. Where to put the clips
 
 Inside the `input/` folder there are three subfolders:
