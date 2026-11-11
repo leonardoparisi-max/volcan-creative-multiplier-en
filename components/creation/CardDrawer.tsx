@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { X, Type, ImageIcon, Copy, Loader2, Upload, Video, VolumeX, Volume2, Pencil, Trash2, Captions, RefreshCw, Zap, ListPlus } from "lucide-react";
 import type { ComponentRow, ImageAsset, Config, Word } from "@/lib/types";
-import { api, TEXT_STYLES, LAYOUTS } from "@/lib/client";
+import { api, TEXT_STYLES, HOOK_STYLES, LAYOUTS } from "@/lib/client";
+import { isHookStyle } from "@/lib/types";
+import type { TextStyle } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -93,7 +95,13 @@ export function CardDrawer({
 
           {/* text */}
           <Section icon={<Type className="h-3.5 w-3.5" />} title="On-screen text">
-            <Field label="Text (use | for a line break)">
+            <Field
+              label={
+                isHookStyle(r.texto_estilo)
+                  ? "Text (*word* lights up the accent · | line break)"
+                  : "Text (use | for a line break)"
+              }
+            >
               <Input
                 value={r.texto_overlay ?? ""}
                 placeholder="empty = use auto caption"
@@ -103,12 +111,55 @@ export function CardDrawer({
             {hasOverlay ? (
               <>
                 <Field label="Style">
-                  <Segmented
-                    value={r.texto_estilo}
-                    onChange={(v) => patch(r.id, { texto_estilo: v })}
-                    options={TEXT_STYLES.map((t) => ({ value: t.value, label: t.label }))}
-                  />
+                  {r.tipo === "hook" ? (
+                    <div className="grid grid-cols-4 gap-1 rounded-lg border border-border bg-secondary/40 p-1">
+                      {[...TEXT_STYLES, ...HOOK_STYLES].map((t) => (
+                        <button
+                          key={t.value}
+                          type="button"
+                          title={t.desc}
+                          onClick={() => {
+                            const p: Partial<ComponentRow> = { texto_estilo: t.value as TextStyle };
+                            // text hooks live on the split line, like the Shorts
+                            const split = r.layout === "imagem_cima" || r.layout === "imagem_baixo";
+                            if (isHookStyle(t.value) && !isHookStyle(r.texto_estilo) && split) {
+                              p.texto_posicao = r.divisao;
+                            }
+                            patch(r.id, p);
+                          }}
+                          className={
+                            "rounded-md px-2 py-1.5 text-xs font-medium transition-colors " +
+                            (r.texto_estilo === t.value
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:bg-secondary hover:text-foreground")
+                          }
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <Segmented
+                      value={isHookStyle(r.texto_estilo) ? "tarja" : r.texto_estilo}
+                      onChange={(v) => patch(r.id, { texto_estilo: v })}
+                      options={TEXT_STYLES.map((t) => ({ value: t.value, label: t.label }))}
+                    />
+                  )}
                 </Field>
+                {isHookStyle(r.texto_estilo) && (
+                  <>
+                    <p className="text-[11px] leading-snug text-muted-foreground">
+                      {HOOK_STYLES.find((h) => h.value === r.texto_estilo)?.desc}. Stays on screen for the whole hook, over a dark veil.
+                    </p>
+                    <Field label="Badge (optional: brand, series or offer)">
+                      <Input
+                        value={r.texto_selo ?? ""}
+                        placeholder="e.g. HORMOZI"
+                        onChange={(e) => patch(r.id, { texto_selo: e.target.value })}
+                      />
+                    </Field>
+                  </>
+                )}
                 <Slider
                   label="Vertical position"
                   value={r.texto_posicao}
@@ -135,7 +186,15 @@ export function CardDrawer({
             <Field label="Composition">
               <Segmented
                 value={r.layout}
-                onChange={(v) => patch(r.id, { layout: v })}
+                onChange={(v) =>
+                  patch(r.id, {
+                    layout: v,
+                    // a text hook follows the split line when the card becomes split
+                    ...(isHookStyle(r.texto_estilo) && v !== "cheio" && r.layout === "cheio"
+                      ? { texto_posicao: r.divisao }
+                      : {}),
+                  })
+                }
                 options={LAYOUTS.map((l) => ({ value: l.value, label: l.label }))}
               />
             </Field>
@@ -207,7 +266,15 @@ export function CardDrawer({
                   value={r.divisao}
                   min={0.2}
                   max={0.8}
-                  onChange={(v) => patch(r.id, { divisao: v })}
+                  onChange={(v) =>
+                    patch(r.id, {
+                      divisao: v,
+                      // keep a text hook glued to the split line while it moves
+                      ...(isHookStyle(r.texto_estilo) && Math.abs(r.texto_posicao - r.divisao) < 0.005
+                        ? { texto_posicao: v }
+                        : {}),
+                    })
+                  }
                   format={(v) => `${Math.round(v * 100)}%`}
                 />
                 <Slider

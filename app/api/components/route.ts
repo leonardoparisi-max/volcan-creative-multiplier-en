@@ -31,6 +31,7 @@ export async function PUT(req: NextRequest) {
       base.legenda_ativa = r.legenda_ativa;
       base.texto_overlay = r.texto_overlay ?? "";
       base.texto_estilo = r.texto_estilo ?? "tarja";
+      base.texto_selo = r.texto_selo ?? "";
       base.texto_posicao = r.texto_posicao ?? 0.66;
       base.layout = r.layout ?? "cheio";
       base.imagem = r.imagem ?? "";

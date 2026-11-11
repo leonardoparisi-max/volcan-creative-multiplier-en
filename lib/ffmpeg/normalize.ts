@@ -11,6 +11,8 @@ import {
 } from "./loudnorm";
 import { buildAss, buildOverlayAss } from "./ass";
 import { buildTarja } from "./tarja";
+import { buildHookPng } from "./hookStyles";
+import { isHookStyle } from "../types";
 import { getTranscript, editedTranscriptPath } from "../whisper";
 import { resolveFont } from "../fonts";
 import { hashFile } from "../hash";
@@ -143,6 +145,7 @@ function masterKey(
     texto_overlay: row.texto_overlay,
     texto_estilo: row.texto_estilo,
     texto_posicao: row.texto_posicao,
+    texto_selo: isHookStyle(row.texto_estilo) ? row.texto_selo ?? "" : "",
     layout: row.layout,
     imagem: row.imagem,
     imgHash,
@@ -373,7 +376,22 @@ export async function buildMaster(
       deps.onLog?.(`  ${row.id}: no speech detected, no caption`);
     }
   } else if (hasOverlay) {
-    if (row.texto_estilo === "tarja") {
+    if (isHookStyle(row.texto_estilo)) {
+      // text hook (Shorts look): full-frame PNG with veil + plate, for the whole clip
+      const png = await buildHookPng({
+        texto: row.texto_overlay,
+        estilo: row.texto_estilo,
+        selo: row.texto_selo,
+        posicao: row.texto_posicao,
+        width: W,
+        height: H,
+      });
+      inputs.push("-i", png);
+      const hIdx = idx++;
+      chains.push(`[${baseLabel}][${hIdx}:v]overlay=x=0:y=0:format=auto[styled]`);
+      styled = "styled";
+      deps.onLog?.(`  ${row.id}: text hook ${row.texto_estilo}`);
+    } else if (row.texto_estilo === "tarja") {
       const tarja = await buildTarja(cfg, row.texto_overlay);
       if (tarja) {
         inputs.push("-i", tarja.path);
@@ -403,7 +421,7 @@ export async function buildMaster(
 
   // manifest text: overlay wins; otherwise the first ~12 words actually said.
   const texto = hasOverlay
-    ? row.texto_overlay.replace(/\|/g, " ").trim()
+    ? row.texto_overlay.replace(/\|/g, " ").replace(/\s\/\s/g, " ").replace(/\*/g, "").trim()
     : transcript?.words.length
     ? transcript.words.slice(0, 12).map((w) => w.text).join(" ")
     : "";

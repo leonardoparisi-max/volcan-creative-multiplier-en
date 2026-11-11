@@ -1,5 +1,7 @@
 "use client";
+import { useEffect, useState } from "react";
 import type { Config, ComponentRow } from "@/lib/types";
+import { isHookStyle } from "@/lib/types";
 import { cn } from "@/lib/cn";
 
 /**
@@ -27,11 +29,28 @@ export function CompositionPreview({
   const imgThumb = imageHash ? `/api/thumb?hash=${imageHash}` : "";
 
   const hasOverlay = (row.texto_overlay ?? "").trim().length > 0;
+  const isHook = hasOverlay && isHookStyle(row.texto_estilo);
   const isTarja = hasOverlay && row.texto_estilo === "tarja";
   const isSimples = hasOverlay && row.texto_estilo === "simples";
   const isLegenda = !hasOverlay && row.legenda_ativa;
 
   const lines = (row.texto_overlay ?? "").split("|").map((l) => l.trim());
+
+  // text hook plate comes from the real renderer, debounced while typing
+  const hookQuery = isHook
+    ? new URLSearchParams({
+        estilo: row.texto_estilo,
+        texto: row.texto_overlay,
+        selo: row.texto_selo ?? "",
+        posicao: String(row.texto_posicao ?? 0.5),
+      }).toString()
+    : "";
+  const [hookSrc, setHookSrc] = useState("");
+  useEffect(() => {
+    if (!hookQuery) return setHookSrc("");
+    const t = setTimeout(() => setHookSrc(`/api/hookpng?${hookQuery}`), 300);
+    return () => clearTimeout(t);
+  }, [hookQuery]);
 
   const Region = ({ thumb, foco }: { thumb: string; foco: number }) =>
     thumb ? (
@@ -78,6 +97,11 @@ export function CompositionPreview({
       )}
 
       {/* text layer */}
+      {isHook && hookSrc && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={hookSrc} alt="" className="pointer-events-none absolute inset-0 h-full w-full" />
+      )}
+
       {isTarja && (
         <div
           className="cc-grad absolute left-0 right-0 flex flex-col items-center justify-center px-3 py-2 text-center"

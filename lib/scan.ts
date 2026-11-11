@@ -4,6 +4,7 @@ import { run } from "./ffmpeg/exec";
 import { probe } from "./ffmpeg/probe";
 import { hashFile } from "./hash";
 import { parseCsv, serializeCsv } from "./csv";
+import { TEXT_STYLE_VALUES } from "./types";
 import { transcriptPath, editedTranscriptPath } from "./whisper";
 import {
   kindDir,
@@ -56,6 +57,7 @@ const CSV_HEADER = [
   "punch_in",
   "variante_de",
   "origem_sugestao",
+  "texto_selo",
 ];
 
 interface SavedEdit {
@@ -64,6 +66,7 @@ interface SavedEdit {
   legenda_ativa?: boolean;
   texto_overlay?: string;
   texto_estilo?: TextStyle;
+  texto_selo?: string;
   texto_posicao?: number;
   layout?: LayoutMode;
   imagem?: string;
@@ -93,7 +96,7 @@ function parseList(v: string | undefined): string[] {
 }
 function parseStyle(v: string | undefined): TextStyle | undefined {
   const s = (v || "").trim().toLowerCase();
-  return s === "tarja" || s === "simples" ? (s as TextStyle) : undefined;
+  return (TEXT_STYLE_VALUES as readonly string[]).includes(s) ? (s as TextStyle) : undefined;
 }
 function parseLayout(v: string | undefined): LayoutMode | undefined {
   const s = (v || "").trim().toLowerCase();
@@ -121,6 +124,7 @@ function readSavedEdits(): Map<string, SavedEdit> {
       legenda_ativa: parseBool(r[idx("legenda_ativa")]),
       texto_overlay: r[idx("texto_overlay")] ?? "",
       texto_estilo: parseStyle(r[idx("texto_estilo")]),
+      texto_selo: r[idx("texto_selo")] ?? "",
       texto_posicao: parseNum(r[idx("texto_posicao")]),
       layout: parseLayout(r[idx("layout")]),
       imagem: r[idx("imagem")] ?? "",
@@ -263,6 +267,7 @@ export async function scanComponents(cfg: Config): Promise<ComponentRow[]> {
         legenda_ativa: edit?.legenda_ativa ?? true,
         texto_overlay: edit?.texto_overlay ?? "",
         texto_estilo: edit?.texto_estilo ?? "tarja",
+        texto_selo: edit?.texto_selo ?? "",
         texto_posicao: edit?.texto_posicao ?? cfg.tarja.posicao_vertical,
         layout: edit?.layout ?? "cheio",
         imagem: edit?.imagem ?? "",
@@ -296,6 +301,7 @@ export async function scanComponents(cfg: Config): Promise<ComponentRow[]> {
       legenda_ativa: edit.legenda_ativa ?? true,
       texto_overlay: edit.texto_overlay ?? "",
       texto_estilo: edit.texto_estilo ?? "tarja",
+      texto_selo: edit.texto_selo ?? "",
       texto_posicao: edit.texto_posicao ?? cfg.tarja.posicao_vertical,
       layout: edit.layout ?? "cheio",
       imagem: edit.imagem ?? "",
@@ -329,6 +335,7 @@ export async function scanComponents(cfg: Config): Promise<ComponentRow[]> {
       legenda_ativa: edit.legenda_ativa ?? true,
       texto_overlay: edit.texto_overlay ?? "",
       texto_estilo: edit.texto_estilo ?? "tarja",
+      texto_selo: edit.texto_selo ?? "",
       texto_posicao: edit.texto_posicao ?? cfg.tarja.posicao_vertical,
       layout: edit.layout ?? base.layout,
       imagem: edit.imagem ?? base.imagem,
@@ -381,6 +388,7 @@ export function writeComponentsCsv(rows: ComponentRow[]): void {
       r.punch_in == null ? "" : bool(r.punch_in),
       r.variante_de ?? "",
       r.origem_sugestao ?? "",
+      r.texto_selo ?? "",
     ]);
   }
   fs.writeFileSync(COMPONENTS_CSV, serializeCsv(out), "utf8");
@@ -404,6 +412,7 @@ export function loadComponentsCsv(): ComponentRow[] {
       legenda_ativa: /^(true|1|yes|sim)$/i.test(r[idx("legenda_ativa")] ?? ""),
       texto_overlay: r[idx("texto_overlay")] ?? "",
       texto_estilo: parseStyle(r[idx("texto_estilo")]) ?? "tarja",
+      texto_selo: r[idx("texto_selo")] ?? "",
       texto_posicao: parseNum(r[idx("texto_posicao")]) ?? 0.66,
       layout: parseLayout(r[idx("layout")]) ?? "cheio",
       imagem: r[idx("imagem")] ?? "",

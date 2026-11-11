@@ -251,7 +251,11 @@ function KanbanCard({
           )}
           {hasOverlay ? (
             <Chip on icon={<Type className="h-3 w-3" />}>
-              {r.texto_estilo === "tarja" ? "bar" : "text"}
+              {r.texto_estilo === "tarja"
+                ? "bar"
+                : r.texto_estilo === "simples"
+                ? "text"
+                : ({ caixa: "box", pincel: "brush", alerta: "alert", autoridade: "authority", objecao: "objection" } as Record<string, string>)[r.texto_estilo]}
             </Chip>
           ) : r.legenda_ativa ? (
             <Chip on icon={<Captions className="h-3 w-3" />}>caption</Chip>

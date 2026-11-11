@@ -25,7 +25,14 @@ export type TransitionType =
 export type EdgeEffect = "none" | "fadeblack" | "fadewhite";
 
 /** How the on-screen text of a component is rendered. */
-export type TextStyle = "tarja" | "simples";
+/** "tarja"/"simples" serve any card; the other five are the hook-only text hooks (same look as the YouTube Shorts). */
+export const HOOK_STYLE_VALUES = ["caixa", "pincel", "alerta", "autoridade", "objecao"] as const;
+export type HookStyle = (typeof HOOK_STYLE_VALUES)[number];
+export const TEXT_STYLE_VALUES = ["tarja", "simples", ...HOOK_STYLE_VALUES] as const;
+export type TextStyle = (typeof TEXT_STYLE_VALUES)[number];
+export function isHookStyle(s: string | undefined): s is HookStyle {
+  return !!s && (HOOK_STYLE_VALUES as readonly string[]).includes(s);
+}
 
 /** Frame composition of a component. */
 export type LayoutMode = "cheio" | "imagem_cima" | "imagem_baixo";
@@ -160,6 +167,7 @@ export interface ComponentRow {
   texto_overlay: string; // "" = none; "|" = line break
   texto_estilo: TextStyle; // tarja (gradient bar) or simples (plain drawtext)
   texto_posicao: number; // 0-1 vertical centre of the bar/overlay
+  texto_selo?: string; // optional pill above a hook-style text hook ("" = none)
   layout: LayoutMode;
   imagem: string; // split-media filename in input/imagens — image OR video
   split_mudo?: boolean; // when the split media is a video: mute it (default true)

@@ -268,6 +268,15 @@ export const TEXT_STYLES: { value: TextStyle; label: string; desc: string }[] = 
   { value: "simples", label: "Plain", desc: "Text straight on screen, no bar" },
 ];
 
+/** Text hooks (same look as the YouTube Shorts) — only offered on Hook cards. */
+export const HOOK_STYLES: { value: TextStyle; label: string; desc: string }[] = [
+  { value: "caixa", label: "Box", desc: "Direct statement" },
+  { value: "pincel", label: "Brush", desc: "Promise or curiosity (line 1 on the brush)" },
+  { value: "alerta", label: "Alert", desc: "Mistake, loss or risk" },
+  { value: "autoridade", label: "Authority", desc: "Number or strong benefit" },
+  { value: "objecao", label: "Objection", desc: "Question, \"stop\", \"don't\", contradiction" },
+];
+
 export const LAYOUTS: { value: LayoutMode; label: string; desc: string }[] = [
   { value: "cheio", label: "Full video", desc: "Video fills the whole screen" },
   { value: "imagem_cima", label: "Media on top", desc: "Media on top, video below" },

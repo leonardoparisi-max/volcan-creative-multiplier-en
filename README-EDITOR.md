@@ -82,6 +82,24 @@ away as soon as you save.
 If the transcript came out very wrong, use **re-transcribe** to redo it from
 scratch (this discards any saved edit).
 
+### Text hook (Hook cards only)
+
+On a hook card, under **Style**, besides Bar and Plain there are 5 text hooks with the same look as our YouTube Shorts.
+Each one fits a kind of line:
+
+| Style | Use it for | Example |
+|---|---|---|
+| Alert | mistake, loss, risk | IT'S \*DUMB\* TO STOP \| WHAT WORKS |
+| Objection | question, "stop", "don't" | STOP MAKING \| \*CONTENT\* |
+| Authority | number or strong benefit | 1 RECORDING = \| \*30 ADS\* |
+| Brush | promise or curiosity | 30 ADS \| \*WITHOUT AN EDITOR\* |
+| Box | direct statement | YOUR SAAS NEEDS \| THIS \*CALCULATOR\* |
+
+- `*word*` lights up the accent; `|` breaks the line.
+- **Badge** (optional): a pill on top with the brand, series or offer.
+- On a split screen the text hook sits on the split line and follows it when you move the split. Vertical position is still adjustable.
+- It stays on screen for the whole hook, over a dark veil (instead of the caption).
+
 ## 4. When an error shows up
 
 The tool tries to explain the error in plain English, like:

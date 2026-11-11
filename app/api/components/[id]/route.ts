@@ -75,6 +75,7 @@ function removeVariant(id: string, baseId: string): void {
               ...r,
               texto_overlay: last.texto_overlay,
               texto_estilo: last.texto_estilo,
+              texto_selo: last.texto_selo,
               texto_posicao: last.texto_posicao,
               legenda_ativa: last.legenda_ativa,
               layout: last.layout,

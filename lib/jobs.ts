@@ -192,7 +192,7 @@ export function slugLeva(s: string): string {
 /** How the hook's on-screen text is produced — for the manifest's hook_modo column. */
 function hookMode(row: ComponentRow | undefined): string {
   if (!row) return "nenhum";
-  if ((row.texto_overlay ?? "").trim()) return row.texto_estilo === "simples" ? "simples" : "tarja";
+  if ((row.texto_overlay ?? "").trim()) return row.texto_estilo ?? "tarja";
   return row.legenda_ativa ? "legenda" : "nenhum";
 }
 
